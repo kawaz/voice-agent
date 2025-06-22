@@ -7,21 +7,24 @@ OpenAI Whisperを使った音声認識の実験と実装を行うサンドボッ
 ```
 whisper/
 ├── README.md                         # このファイル
-├── SETUP.md                         # 環境構築手順
 ├── pyproject.toml                   # uvプロジェクト設定
 ├── uv.lock                         # 依存関係ロックファイル
 ├── .python-version                 # Python 3.11指定
+├── main.py                          # エントリーポイント
 │
-├── mic_transcribe_final.py          # 🎯 最終実装版（マルチレベル認識）
-├── mic_transcribe_auto.py           # マイク入力の自動認識（シンプル版）
-├── mic_transcribe_continuous_debug.py # デバッグ用（音量レベル表示）
-├── simple_transcribe.py             # 音声ファイルの文字起こし
+├── 実装ファイル（本番用）
+│   ├── mic_transcribe_final.py      # 🎯 最終実装版（マルチレベル認識）
+│   ├── mic_transcribe_auto.py       # マイク入力の自動認識（シンプル版）
+│   ├── mic_transcribe_continuous_debug.py # デバッグ用（音量レベル表示）
+│   └── simple_transcribe.py         # 音声ファイルの文字起こし
 │
 ├── archive/                         # 開発過程のアーカイブ
 │   ├── README.md                    # アーカイブの説明
-│   └── YYYYMMDDTHHSS-*.py          # タイムスタンプ付き過去バージョン
+│   └── YYYYMMDDTHHSS-*.py          # タイムスタンプ付き過去バージョン（14ファイル）
 │
-└── ドキュメント/
+└── docs/                            # ドキュメント
+    ├── README.md                    # ドキュメント一覧
+    ├── SETUP.md                     # 環境構築手順
     ├── NEXT_IMPROVEMENTS.md         # 今後の改善案
     ├── REALTIME_IMPROVEMENTS.md     # リアルタイム性能向上の検討
     └── SPEAKER_DIARIZATION.md       # 話者分離技術の調査
@@ -105,6 +108,10 @@ model_name = "small"  # tiny, base, small, medium, large
 
 ## 📚 関連ドキュメント
 
-- 技術的な知見: `/docs/sandbox-findings.md`
-- 環境構築の詳細: `SETUP.md`
-- 今後の改善案: `NEXT_IMPROVEMENTS.md`
+### サンドボックス内
+- 環境構築の詳細: [`docs/SETUP.md`](docs/SETUP.md)
+- 今後の改善案: [`docs/NEXT_IMPROVEMENTS.md`](docs/NEXT_IMPROVEMENTS.md)
+- その他のドキュメント: [`docs/`](docs/)
+
+### プロジェクト全体
+- 技術的な知見: [`/docs/sandbox-findings.md`](/docs/sandbox-findings.md)
