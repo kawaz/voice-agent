@@ -13,7 +13,7 @@
 
 ### 開発方針
 - **[開発ガイドライン](docs/development-guidelines.md)** - サンドボックスの活用方法、作業日誌の作成など
-- **[Git ワークフロー](docs/git-workflow.md)** - 複数エージェント協働時のGit操作方法 ⚠️ **重要指示**
+- **[Git ワークフロー](docs/git-workflow.md)** - 複数エージェント協働時のGit操作方法
 - **[通知ガイド](docs/notification-guide.md)** - ユーザーへの通知実装ガイドライン
 - **[言語別ガイドライン](docs/language-specific-guidelines.md)** - 特にPythonでの`uv`使用方法
 
