@@ -7,7 +7,7 @@
 ## 技術スタック
 
 - **音声認識**: OpenAI Whisper（ローカル版）
-- **ウェイクワード**: OpenWakeWord
+- **ウェイクワード**: Picovoice Porcupine（検証済み、高性能）
 - **音声合成**: VOICEVOX
 - **実装言語**: Python（uvでパッケージ管理）
 - **プラットフォーム**: macOS（開発）、Raspberry Pi 4（本番）
@@ -139,36 +139,69 @@ if __name__ == "__main__":
 
 ### Week 2: ウェイクワード実装
 
-#### Day 6-7: OpenWakeWord導入
+#### Day 6-7: Porcupine導入
 ```python
 # mvp/wake_word_detector.py
-import openwakeword
-from openwakeword.model import Model
-import numpy as np
+import pvporcupine
+import pvrecorder
+import os
 
 class WakeWordDetector:
-    def __init__(self, model_path=None):
-        # デフォルトモデルまたはカスタムモデル
-        if model_path:
-            self.model = Model(model_path)
+    def __init__(self, keywords=None, keyword_paths=None):
+        # APIキー取得
+        access_key = os.environ.get('PICOVOICE_ACCESS_KEY')
+        if not access_key:
+            raise ValueError("PICOVOICE_ACCESS_KEY環境変数が必要です")
+        
+        # Porcupine初期化
+        if keyword_paths:
+            # カスタムウェイクワード（.ppnファイル）
+            self.porcupine = pvporcupine.create(
+                access_key=access_key,
+                keyword_paths=keyword_paths
+            )
         else:
-            # プリトレーニング済みモデル使用
-            self.model = Model()
-            
-    def detect(self, audio_frame):
-        # 音声フレームからウェイクワード検出
-        prediction = self.model.predict(audio_frame)
-        return prediction > 0.5  # 閾値
+            # プリセットキーワード
+            self.porcupine = pvporcupine.create(
+                access_key=access_key,
+                keywords=keywords or ['picovoice']
+            )
+        
+        # レコーダー初期化
+        self.recorder = pvrecorder.PvRecorder(
+            frame_length=self.porcupine.frame_length
+        )
+    
+    def start(self):
+        """検出開始"""
+        self.recorder.start()
+    
+    def detect(self):
+        """ウェイクワード検出（ブロッキング）"""
+        pcm = self.recorder.read()
+        keyword_index = self.porcupine.process(pcm)
+        return keyword_index >= 0
+    
+    def stop(self):
+        """検出停止"""
+        self.recorder.stop()
+    
+    def cleanup(self):
+        """リソース解放"""
+        self.recorder.delete()
+        self.porcupine.delete()
 ```
 
 #### Day 8-9: カスタムウェイクワード作成
-- 日本語ウェイクワード「ねえ、エージェント」の学習
-- TTS（Text-to-Speech）でトレーニングデータ生成
-- モデルのファインチューニング
+- Picovoice Consoleで日本語ウェイクワード作成
+- 推奨: 「ねえハウス」「おっけーはうす」など
+- 作成時間: 約5分（Webコンソール使用）
+- 複数パターン登録で認識率向上
 
 #### Day 10: 統合
 - ウェイクワード検出後のみ音声認識を開始
-- 省電力モードの実装
+- 省電力モードの実装（待機時CPU 2.4%）
+- Porcupine（常時待機）→ Whisper（検出時のみ）の連携
 
 ### Week 3-4: 高度な機能
 
@@ -247,9 +280,14 @@ source .venv/bin/activate
 
 # 依存関係インストール
 uv pip install openai-whisper sounddevice numpy requests
+uv pip install pvporcupine pvrecorder
 
 # VOICEVOXダウンロード
 # https://voicevox.hiroshiba.jp/
+
+# Picovoice APIキー設定
+# https://console.picovoice.ai/ でアカウント作成後、APIキー取得
+export PICOVOICE_ACCESS_KEY='your-api-key-here'
 
 # 実行
 cd mvp
