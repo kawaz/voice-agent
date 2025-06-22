@@ -180,11 +180,67 @@
 「こんなに進化したんだ」って達成感がある。
 ```
 
+## ファイル整理とドキュメント管理
+
+### 基本原則
+
+1. **コードとドキュメントの分離**
+   - サンドボックス内でも`docs/`ディレクトリを作成
+   - READMEは除いて、他のドキュメントは`docs/`へ
+
+2. **定期的な整理**
+   - 開発が進んだら古いファイルはアーカイブへ
+   - メインディレクトリには本番用ファイルのみ
+   - ブランチをマージする前に必ず見直し
+
+3. **命名規則の徹底**
+   - アーカイブファイル: `YYYYMMDDTHHSS-番号-説明.py`
+   - 同じ機能の異なるバージョンは分かりやすい命名を
+
+### チェックリスト（マージ前）
+
+- [ ] 不要なファイルは削除またはアーカイブしたか
+- [ ] ドキュメントは適切な場所に配置したか
+- [ ] READMEは最新の状態を反映しているか
+- [ ] ファイル名は分かりやすいか
+
+### 例：Whisperサンドボックスの整理
+
+**Before（混乱）**:
+```
+mic_transcribe_auto.py
+mic_transcribe_continuous_debug.py
+mic_transcribe_realtime.py
+mic_transcribe_streaming.py
+mic_transcribe_multilevel.py
+mic_transcribe_multilevel_v2.py
+mic_transcribe_advanced.py
+mic_transcribe_final.py
+SETUP.md
+NEXT_IMPROVEMENTS.md
+...
+```
+
+**After（整理済み）**:
+```
+├── mic_transcribe_final.py      # 本番用（最新）
+├── mic_transcribe_auto.py       # 軽量版
+├── mic_transcribe_continuous_debug.py # デバッグ用
+├── simple_transcribe.py
+├── archive/
+│   └── YYYYMMDDTHHSS-*.py      # 過去バージョン
+└── docs/
+    ├── SETUP.md
+    └── *.md                     # その他ドキュメント
+```
+
 ## まとめ
 
 サンドボックスは「きれいなコード」を書く場所ではなく、「学びを得る」場所です。失敗も含めて記録し、後から振り返れるようにすることが重要です。
 
 そして作業日誌を通じて、技術的な成果だけでなく、作業プロセスそのものも価値ある成果物として残していきます。
+
+常にファイルを整理し、ドキュメントを最新に保つことで、自分も他の人も理解しやすいプロジェクトを維持しましょう。
 
 ## 知見のプロジェクト全体へのフィードバック
 
