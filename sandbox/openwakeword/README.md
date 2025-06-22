@@ -6,10 +6,10 @@ OpenWakeWordの動作確認環境です。
 
 OpenWakeWordのv0.6.0では、モデルファイルの配布形式が変更されており、プリトレーニング済みモデルが自動的にダウンロードされない問題があります。
 
-### 動作確認済みのプログラム
+### 動作する主要プログラム
 
-- `test_audio_monitor.py` - 音声入力モニタリング（OpenWakeWordなし）
-- `simple_test.py` - 基本的な音声録音テスト
+- `continuous_detection.py` - 実用的な連続検出実装（Whisper統合準備済み）
+- `custom_threshold.py` - 最適な閾値を見つけるための調整ツール
 
 ### 解決方法（検討中）
 
@@ -26,50 +26,47 @@ uv sync
 
 ## ファイル構成
 
-- `test_basic.py` - OpenWakeWordの基本的な動作確認
-- `test_microphone.py` - マイク入力でのウェイクワード検出
-- `test_multiple_wakewords.py` - 複数ウェイクワード同時検出
-- `continuous_detection.py` - 連続検出デモ（実用的な例）
-- `custom_threshold.py` - 閾値調整のテスト
-- `requirements.txt` - 必要なパッケージリスト
+```
+openwakeword/
+├── continuous_detection.py      # 🎯 実用的な連続検出（バッファリング付き）
+├── custom_threshold.py          # 閾値調整ツール（リアルタイムグラフ表示）
+├── download_models.py           # モデルダウンロードユーティリティ
+├── pyproject.toml              # プロジェクト設定と依存関係
+├── uv.lock                     # 依存関係のロックファイル
+│
+├── archive/                    # アーカイブされた開発・実験ファイル
+│   ├── 20250623T020005-test_basic.py          # 基本動作確認
+│   ├── 20250623T020005-test_microphone.py     # マイク入力検出テスト
+│   ├── 20250623T020005-test_multiple_wakewords.py  # 複数ウェイクワード
+│   ├── 20250623T020005-test_audio_monitor.py  # 音声モニター（VADなし）
+│   ├── 20250623T020005-test_with_predownloaded.py  # モデル確認テスト
+│   ├── 20250623T020005-simple_test.py         # シンプルな録音テスト
+│   ├── 20250623T020005-wake_word_demo.py      # デモ用簡易版
+│   └── 20250623T020005-wake_word_easy.py      # 超簡易版（教育用）
+│
+└── docs/                       # ドキュメント
+    ├── SETUP.md               # 詳細なセットアップガイド
+    ├── FINDINGS.md            # 技術検証の詳細結果
+    └── SUMMARY.md             # 検証サマリー
+```
 
 ## 使い方
 
-### 1. 基本的なテスト
-
-```bash
-# 利用可能なモデルの確認
-uv run python test_basic.py
-
-# 音声ファイルでのテスト（準備中）
-uv run python test_audio_file.py test_audio.wav
-```
-
-### 2. マイク入力でのリアルタイム検出
-
-```bash
-# デフォルトのウェイクワード（"alexa"）で検出
-uv run python test_microphone.py
-
-# カスタムウェイクワードを指定
-uv run python test_microphone.py --model hey_jarvis
-
-# 閾値を調整（デフォルト: 0.5）
-uv run python test_microphone.py --threshold 0.7
-```
-
-### 3. 複数ウェイクワード検出
-
-```bash
-# 複数のウェイクワードを同時に検出
-uv run python test_multiple_wakewords.py
-```
-
-### 4. 連続検出デモ
+### 1. 連続検出（推奨）
 
 ```bash
 # 実用的な連続検出（バッファリング付き）
 uv run python continuous_detection.py
+
+# オプション指定
+uv run python continuous_detection.py --pre-buffer 1.5 --post-buffer 3.0
+```
+
+### 2. 閾値調整ツール
+
+```bash
+# リアルタイムで閾値を調整（グラフ表示）
+uv run python custom_threshold.py
 ```
 
 ## OpenWakeWordの特徴
