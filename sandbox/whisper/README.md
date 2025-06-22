@@ -1,78 +1,110 @@
-# Whisper サンドボックス
+# Whisperサンドボックス
 
-OpenAI Whisperの動作確認環境です。
+OpenAI Whisperを使った音声認識の実験と実装を行うサンドボックスです。
 
-## セットアップ
+## 📁 ディレクトリ構成
 
+```
+whisper/
+├── README.md                         # このファイル
+├── SETUP.md                         # 環境構築手順
+├── pyproject.toml                   # uvプロジェクト設定
+├── uv.lock                         # 依存関係ロックファイル
+├── .python-version                 # Python 3.11指定
+│
+├── mic_transcribe_final.py          # 🎯 最終実装版（マルチレベル認識）
+├── mic_transcribe_auto.py           # マイク入力の自動認識（シンプル版）
+├── mic_transcribe_continuous_debug.py # デバッグ用（音量レベル表示）
+├── simple_transcribe.py             # 音声ファイルの文字起こし
+│
+├── archive/                         # 開発過程のアーカイブ
+│   ├── README.md                    # アーカイブの説明
+│   └── YYYYMMDDTHHSS-*.py          # タイムスタンプ付き過去バージョン
+│
+└── ドキュメント/
+    ├── NEXT_IMPROVEMENTS.md         # 今後の改善案
+    ├── REALTIME_IMPROVEMENTS.md     # リアルタイム性能向上の検討
+    └── SPEAKER_DIARIZATION.md       # 話者分離技術の調査
+```
+
+## 🚀 クイックスタート
+
+### 1. 環境構築
 ```bash
 # システムの依存関係
-brew install portaudio  # PyAudioのビルドに必要
-brew install ffmpeg     # Whisperの音声処理に必要
+brew install portaudio ffmpeg
 
-# 依存関係のインストール（pyproject.tomlから）
+# Python依存関係のインストール
 uv sync
 ```
 
-## 現在のファイル構成
+### 2. 使い方
 
-### メインプログラム
-- `mic_transcribe_auto.py` - 🎯 **推奨** 最適化された自動音声認識
-- `mic_transcribe_continuous_debug.py` - デバッグ版（音量レベル確認用）
-- `simple_transcribe.py` - 音声ファイルの簡単な文字起こしツール
-
-### ドキュメント
-- `DEVELOPMENT_HISTORY.md` - 開発過程の詳細な記録
-- `FINDINGS.md` - 音声認識の検証結果と知見
-- `SETUP.md` - 詳細なセットアップ手順
-
-### アーカイブ
-- `archive/` - 開発過程の各バージョンを時系列で保存
-
-## 使い方
-
-### 1. マイク入力で自動音声認識（推奨）
-
+#### マイク入力のリアルタイム認識（推奨）
 ```bash
+# 最終実装版（マルチレベル認識） - 最高精度
+uv run python mic_transcribe_final.py
+
+# シンプル版（軽量）
 uv run python mic_transcribe_auto.py
-```
 
-話すと自動的に録音が開始され、話し終わると認識結果が表示されます。
-
-### 2. 音声ファイルの文字起こし
-
-```bash
-# デフォルト（baseモデル）で文字起こし
-uv run python simple_transcribe.py your_audio.mp3
-
-# smallモデルを使用
-uv run python simple_transcribe.py your_audio.mp3 small
-```
-
-### 3. 音量レベルの確認（環境調整用）
-
-```bash
+# デバッグ版（音量調整用）
 uv run python mic_transcribe_continuous_debug.py
 ```
 
-マイクの音量レベルがリアルタイムで表示されます。
+#### 音声ファイルの文字起こし
+```bash
+uv run python simple_transcribe.py audio.mp3
+```
 
-## Whisperの特徴
+## 🎯 どのファイルを使うべきか？
 
-- **完全オフライン**: インターネット接続不要
-- **多言語対応**: 日本語を含む多数の言語をサポート
-- **複数のモデルサイズ**:
-  - tiny (39MB): 最速、精度は低め
-  - base (74MB): バランス型
-  - small (244MB): 高精度 ← 現在の推奨
-  - medium (769MB): より高精度
-  - large (1.5GB): 最高精度
+### 本番利用
+- **`mic_transcribe_final.py`** - 最も高精度な実装
+  - マルチレベル認識（3秒/8秒/20秒/無音区切り）
+  - 誤認識対策済み
+  - カラーコード表示
 
-## 注意事項
+### テスト・開発
+- **`mic_transcribe_auto.py`** - シンプルで理解しやすい
+  - 基本的な無音検出
+  - 軽量な実装
+
+### トラブルシューティング
+- **`mic_transcribe_continuous_debug.py`** - 音量レベルの確認
+  - リアルタイム音量メーター
+  - 閾値調整の参考に
+
+## 📊 パフォーマンス
+
+| ファイル | 精度 | 処理速度 | メモリ使用量 | 用途 |
+|---------|------|----------|-------------|------|
+| final.py | ★★★★★ | ★★★☆☆ | 約800MB | 本番利用 |
+| auto.py | ★★★☆☆ | ★★★★★ | 約500MB | 軽量版 |
+| debug.py | ★★★☆☆ | ★★★★☆ | 約500MB | デバッグ |
+
+## 🔧 カスタマイズ
+
+### 音声検出閾値の調整
+```python
+# mic_transcribe_auto.py 内
+self.silence_threshold = 250  # 環境に応じて調整
+```
+
+### モデルサイズの変更
+```python
+# どのファイルでも共通
+model_name = "small"  # tiny, base, small, medium, large
+```
+
+## ⚠️ 注意事項
 
 - 初回実行時はモデルのダウンロードに時間がかかります
 - macOSでは初回実行時にマイクへのアクセス許可が必要です
 - モデルは `~/.cache/whisper/` に保存されます
 
-## 開発履歴
+## 📚 関連ドキュメント
 
-詳細な開発過程と知見については `DEVELOPMENT_HISTORY.md` を参照してください。
+- 技術的な知見: `/docs/sandbox-findings.md`
+- 環境構築の詳細: `SETUP.md`
+- 今後の改善案: `NEXT_IMPROVEMENTS.md`
