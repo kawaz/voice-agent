@@ -1,38 +1,38 @@
-# Cross-Platform Consideration: macOS and Raspberry Pi
+# Cross-Platform Considerations: macOS and Raspberry Pi
 
 ## Overview
 
-This document outlines the considerations for running the voice agent on both macOS and Raspberry Pi platforms. It covers platform-specific challenges, abstraction strategies, performance considerations, and hardware requirements.
+This document outlines considerations for running the voice agent on both macOS and Raspberry Pi platforms. It covers platform-specific challenges, abstraction strategies, performance considerations, and hardware requirements.
 
-## Table of Contents
+## 目次
 
-1. [Platform-Dependent Abstraction](#platform-dependent-abstraction)
-2. [Raspberry Pi Performance Considerations](#raspberry-pi-performance-considerations)
-3. [Hardware Requirements](#hardware-requirements)
-4. [Deployment Method Differences](#deployment-method-differences)
-5. [Recommended Raspberry Pi Models](#recommended-raspberry-pi-models)
-6. [Microphone and Speaker Selection](#microphone-and-speaker-selection)
-7. [Development Environment Setup](#development-environment-setup)
+1. [プラットフォーム依存の抽象化](#プラットフォーム依存の抽象化)
+2. [Raspberry Piのパフォーマンス考慮事項](#raspberry-piのパフォーマンス考慮事項)
+3. [ハードウェア要件](#ハードウェア要件)
+4. [デプロイ方法の違い](#デプロイ方法の違い)
+5. [推奨Raspberry Piモデル](#推奨raspberry-piモデル)
+6. [マイクとスピーカーの選択](#マイクとスピーカーの選択)
+7. [開発環境のセットアップ](#開発環境のセットアップ)
 
-## Platform-Dependent Abstraction
+## プラットフォーム依存の抽象化
 
-### Audio I/O Layer
+### オーディオI/Oレイヤー
 
-The most significant platform difference is audio handling:
+最も大きなプラットフォームの違いはオーディオ処理です：
 
 #### macOS
-- **Native Support**: Core Audio framework
-- **Web API**: Web Speech API (browser-based)
-- **Libraries**: PortAudio, PyAudio for Python implementations
-- **Latency**: Generally low with proper configuration
+- **ネイティブサポート**: Core Audioフレームワーク
+- **Web API**: Web Speech API（ブラウザベース）
+- **ライブラリ**: PortAudio、Python実装用のPyAudio
+- **レイテンシ**: 適切に設定すれば一般的に低い
 
 #### Raspberry Pi
-- **ALSA**: Advanced Linux Sound Architecture (low-level)
-- **PulseAudio**: Higher-level audio server
-- **Libraries**: PortAudio with ALSA backend
-- **Challenges**: Driver configuration, hardware-specific quirks
+- **ALSA**: Advanced Linux Sound Architecture（低レベル）
+- **PulseAudio**: 高レベルオーディオサーバー
+- **ライブラリ**: ALSAバックエンドを使用したPortAudio
+- **課題**: ドライバー設定、ハードウェア固有の問題
 
-#### Abstraction Strategy
+#### 抽象化戦略
 ```typescript
 interface AudioInterface {
   initialize(): Promise<void>;
@@ -41,26 +41,26 @@ interface AudioInterface {
   playAudio(buffer: AudioBuffer): Promise<void>;
 }
 
-// Platform-specific implementations
+// プラットフォーム固有の実装
 class MacOSAudioInterface implements AudioInterface { }
 class RaspberryPiAudioInterface implements AudioInterface { }
 ```
 
-### Speech Recognition Abstraction
+### 音声認識の抽象化
 
-#### macOS Options
-- Web Speech API (browser)
-- Whisper API (cloud)
-- Local Whisper (CPU/GPU accelerated)
+#### macOSのオプション
+- Web Speech API（ブラウザ）
+- Whisper API（クラウド）
+- ローカルWhisper（CPU/GPUアクセラレーション）
 - Google Cloud Speech-to-Text
 
-#### Raspberry Pi Options
-- Whisper Tiny/Base models (local)
-- Julius (lightweight, offline)
-- Pocketsphinx (very lightweight)
-- Cloud APIs (network dependent)
+#### Raspberry Piのオプション
+- Whisper Tiny/Baseモデル（ローカル）
+- Julius（軽量、オフライン）
+- Pocketsphinx（非常に軽量）
+- クラウドAPI（ネットワーク依存）
 
-#### Abstraction Strategy
+#### 抽象化戦略
 ```typescript
 interface SpeechRecognizer {
   initialize(config: RecognizerConfig): Promise<void>;
@@ -68,16 +68,16 @@ interface SpeechRecognizer {
   destroy(): Promise<void>;
 }
 
-// Configurable implementations
+// 設定可能な実装
 const recognizer = createRecognizer(platform, {
   offline: isRaspberryPi,
   modelSize: isRaspberryPi ? 'tiny' : 'large'
 });
 ```
 
-### Wake Word Detection Abstraction
+### ウェイクワード検出の抽象化
 
-Platform-agnostic interface with different backends:
+異なるバックエンドを持つプラットフォーム非依存インターフェース：
 
 ```typescript
 interface WakeWordDetector {
@@ -87,33 +87,33 @@ interface WakeWordDetector {
 }
 ```
 
-## Raspberry Pi Performance Considerations
+## Raspberry Piのパフォーマンス考慮事項
 
-### CPU and Memory Constraints
+### CPUとメモリの制約
 
-#### Model Selection Guidelines
-| Component | macOS | Raspberry Pi 4 | Raspberry Pi 3B+ | Pi Zero 2 W |
-|-----------|-------|----------------|------------------|-------------|
-| Whisper Model | Large/Medium | Base/Small | Tiny | Tiny (limited) |
-| Wake Word | Any | Porcupine/Picovoice | Porcupine | Minimal only |
-| Concurrent Processes | Unlimited | 3-4 | 2-3 | 1-2 |
-| RAM Usage Target | < 4GB | < 2GB | < 1GB | < 512MB |
+#### モデル選択ガイドライン
+| コンポーネント | macOS | Raspberry Pi 4 | Raspberry Pi 3B+ | Pi Zero 2 W |
+|----------------|-------|----------------|------------------|-------------|
+| Whisperモデル | Large/Medium | Base/Small | Tiny | Tiny（制限付き） |
+| ウェイクワード | 任意 | Porcupine/Picovoice | Porcupine | 最小限のみ |
+| 同時プロセス | 無制限 | 3-4 | 2-3 | 1-2 |
+| RAM使用量目標 | < 4GB | < 2GB | < 1GB | < 512MB |
 
-### Performance Optimization Strategies
+### パフォーマンス最適化戦略
 
-#### 1. Audio Processing
-- **Buffer Size**: Larger buffers on Pi (512-1024 samples vs 256 on macOS)
-- **Sample Rate**: Consider 16kHz on Pi vs 44.1kHz on macOS
-- **Bit Depth**: 16-bit on Pi is sufficient
+#### 1. オーディオ処理
+- **バッファサイズ**: Piでは大きめのバッファ（512-1024サンプル vs macOSの256）
+- **サンプルレート**: Piでは16kHz、macOSでは44.1kHzを検討
+- **ビット深度**: Piでは16ビットで十分
 
-#### 2. Model Optimization
-- **Quantization**: Use INT8 quantized models where possible
-- **Model Pruning**: Remove unnecessary layers
-- **Caching**: Aggressive caching of recognition results
+#### 2. モデル最適化
+- **量子化**: 可能な限りINT8量子化モデルを使用
+- **モデルプルーニング**: 不要なレイヤーを削除
+- **キャッシング**: 認識結果の積極的なキャッシング
 
-#### 3. Resource Management
+#### 3. リソース管理
 ```python
-# Example: Adaptive quality based on CPU load
+# 例：CPU負荷に基づく適応的品質
 async def adaptive_recognition():
     cpu_usage = get_cpu_usage()
     if cpu_usage > 80:
@@ -124,103 +124,103 @@ async def adaptive_recognition():
         use_optimal_model()
 ```
 
-### Thermal Management
-- Monitor CPU temperature
-- Implement throttling at 70°C
-- Consider passive/active cooling for 24/7 operation
+### 熱管理
+- CPU温度の監視
+- 70°Cでのスロットリング実装
+- 24時間稼働にはパッシブ/アクティブ冷却を検討
 
-## Hardware Requirements
+## ハードウェア要件
 
-### macOS Requirements
-- **Minimum**: MacBook Air M1 or Intel i5
-- **Recommended**: M1 Pro/Max or Intel i7
-- **RAM**: 8GB minimum, 16GB recommended
-- **Storage**: 10GB for models and dependencies
-- **Microphone**: Built-in or USB (any quality)
+### macOS要件
+- **最小**: MacBook Air M1またはIntel i5
+- **推奨**: M1 Pro/MaxまたはIntel i7
+- **RAM**: 最小8GB、推奨16GB
+- **ストレージ**: モデルと依存関係用に10GB
+- **マイク**: 内蔵またはUSB（任意の品質）
 
-### Raspberry Pi Requirements
+### Raspberry Pi要件
 
-#### Minimum Configuration
-- **Model**: Raspberry Pi 3B+
+#### 最小構成
+- **モデル**: Raspberry Pi 3B+
 - **RAM**: 1GB
-- **Storage**: 16GB SD card (Class 10)
-- **Power**: 2.5A power supply
-- **Cooling**: Heatsinks required
+- **ストレージ**: 16GB SDカード（Class 10）
+- **電源**: 2.5A電源
+- **冷却**: ヒートシンク必須
 
-#### Recommended Configuration
-- **Model**: Raspberry Pi 4 (4GB/8GB)
-- **RAM**: 4GB minimum
-- **Storage**: 32GB SD card or SSD via USB
-- **Power**: 3A power supply (official)
-- **Cooling**: Active cooling (fan)
+#### 推奨構成
+- **モデル**: Raspberry Pi 4（4GB/8GB）
+- **RAM**: 最小4GB
+- **ストレージ**: 32GB SDカードまたはUSB経由のSSD
+- **電源**: 3A電源（公式）
+- **冷却**: アクティブ冷却（ファン）
 
-#### Additional Hardware
-- **Audio HAT**: For better audio quality
-- **RTC Module**: For offline time keeping
-- **UPS**: For power stability
+#### 追加ハードウェア
+- **オーディオHAT**: より良い音質のため
+- **RTCモジュール**: オフラインでの時刻管理
+- **UPS**: 電源の安定性
 
-## Deployment Method Differences
+## デプロイ方法の違い
 
-### macOS Deployment
+### macOSデプロイ
 
-#### Development
+#### 開発
 ```bash
-# Clone repository
+# リポジトリのクローン
 git clone https://github.com/kawaz/voice-agent
 cd voice-agent
 
 # Install dependencies
 npm install
 
-# Run development server
+# 開発サーバーの実行
 npm run dev
 ```
 
-#### Production
+#### 本番環境
 ```bash
-# Build application
+# アプリケーションのビルド
 npm run build
 
-# Option 1: Run as service
+# オプション1：サービスとして実行
 npm run start
 
-# Option 2: Package as macOS app
+# オプション2：macOSアプリとしてパッケージ化
 npm run package:macos
 ```
 
-### Raspberry Pi Deployment
+### Raspberry Piデプロイ
 
-#### Initial Setup
+#### 初期セットアップ
 ```bash
-# Update system
+# システムの更新
 sudo apt update && sudo apt upgrade -y
 
 # Install dependencies
 sudo apt install -y nodejs npm python3-pip portaudio19-dev
 
-# Audio setup
+# オーディオセットアップ
 sudo apt install -y alsa-utils pulseaudio
 ```
 
-#### Application Deployment
+#### アプリケーションデプロイ
 ```bash
-# Clone and setup
+# クローンとセットアップ
 git clone https://github.com/kawaz/voice-agent
 cd voice-agent
 
-# Install with Pi-specific flags
+# Pi固有のフラグでインストール
 npm install --build-from-source
 
-# Configure for Pi
+# Pi用に設定
 cp config/raspberry-pi.json config/local.json
 
-# Setup systemd service
+# systemdサービスのセットアップ
 sudo cp deploy/voice-agent.service /etc/systemd/system/
 sudo systemctl enable voice-agent
 sudo systemctl start voice-agent
 ```
 
-#### Docker Deployment (Recommended)
+#### Dockerデプロイ（推奨）
 ```dockerfile
 # Dockerfile.pi
 FROM balenalib/raspberry-pi-debian:bullseye
@@ -237,259 +237,259 @@ CMD ["npm", "start"]
 ```
 
 ```bash
-# Build and run
+# ビルドと実行
 docker build -f Dockerfile.pi -t voice-agent-pi .
 docker run -d --device /dev/snd --restart unless-stopped voice-agent-pi
 ```
 
-## Recommended Raspberry Pi Models
+## 推奨Raspberry Piモデル
 
-### Production Use
+### 本番使用
 
-#### Raspberry Pi 4 (8GB) - Best Choice
-- **Pros**: 
-  - Sufficient RAM for larger models
-  - Quad-core 1.5GHz processor
-  - USB 3.0 for fast storage
-  - Gigabit Ethernet
-- **Cons**: Higher power consumption (3A required)
-- **Use Case**: Full-featured voice agent with local processing
+#### Raspberry Pi 4（8GB） - 最良の選択
+- **長所**: 
+  - 大きなモデルに十分なRAM
+  - クアッドコア1.5GHzプロセッサ
+  - 高速ストレージ用USB 3.0
+  - ギガビットイーサネット
+- **短所**: 高い消費電力（3A必要）
+- **ユースケース**: ローカル処理を備えたフル機能の音声エージェント
 
-#### Raspberry Pi 4 (4GB) - Good Balance
-- **Pros**: 
-  - Good price/performance ratio
-  - Handles most voice tasks well
-  - Lower cost than 8GB model
-- **Cons**: Limited multitasking with large models
-- **Use Case**: Standard voice agent deployment
+#### Raspberry Pi 4（4GB） - 良いバランス
+- **長所**: 
+  - 良好な価格/性能比
+  - ほとんどの音声タスクを十分処理
+  - 8GBモデルより低コスト
+- **短所**: 大きなモデルでのマルチタスキングが制限される
+- **ユースケース**: 標準的な音声エージェントデプロイ
 
-### Development/Testing
+### 開発/テスト
 
 #### Raspberry Pi 3B+
-- **Pros**: 
-  - Widely available
-  - Lower power consumption
-  - Adequate for basic testing
-- **Cons**: 
-  - Limited to lightweight models
-  - Slower processing
-- **Use Case**: Development and lightweight deployments
+- **長所**: 
+  - 広く入手可能
+  - 低い消費電力
+  - 基本的なテストに適切
+- **短所**: 
+  - 軽量モデルに限定
+  - 処理が遅い
+- **ユースケース**: 開発と軽量デプロイ
 
-### Not Recommended
+### 非推奨
 
 #### Raspberry Pi Zero 2 W
-- Too limited for real-time voice processing
-- Consider only for wake word detection nodes
+- リアルタイム音声処理には制限が多すぎる
+- ウェイクワード検出ノードのみを検討
 
 #### Raspberry Pi Pico
-- Microcontroller, not suitable for this application
+- マイクロコントローラーであり、このアプリケーションには不適切
 
-## Microphone and Speaker Selection
+## マイクとスピーカーの選択
 
-### USB Microphones (Recommended)
+### USBマイク（推奨）
 
-#### Budget Option: Kinobo Akiro
-- **Price**: ~$15-20
-- **Pros**: Plug-and-play, omnidirectional
-- **Cons**: Basic quality
-- **Platform**: Works on both macOS and Pi
+#### 予算オプション：Kinobo Akiro
+- **価格**: 約$15-20
+- **長所**: プラグアンドプレイ、無指向性
+- **短所**: 基本的な品質
+- **プラットフォーム**: macOSとPiの両方で動作
 
-#### Mid-Range: Blue Snowball iCE
-- **Price**: ~$40-50
-- **Pros**: Good quality, cardioid pattern
-- **Cons**: Larger size
-- **Platform**: Excellent on both platforms
+#### ミドルレンジ：Blue Snowball iCE
+- **価格**: 約$40-50
+- **長所**: 良好な品質、カーディオイドパターン
+- **短所**: 大きなサイズ
+- **プラットフォーム**: 両プラットフォームで優れた性能
 
-#### Premium: Audio-Technica ATR2100x-USB
-- **Price**: ~$70-80
-- **Pros**: Professional quality, multiple patterns
-- **Platform**: Ideal for high-quality recognition
+#### プレミアム：Audio-Technica ATR2100x-USB
+- **価格**: 約$70-80
+- **長所**: プロフェッショナル品質、複数パターン
+- **プラットフォーム**: 高品質認識に理想的
 
-### I2S Microphones (Raspberry Pi Specific)
+### I2Sマイク（Raspberry Pi専用）
 
 #### SeeedStudio ReSpeaker 2-Mics Pi HAT
-- **Price**: ~$15-20
-- **Pros**: 
-  - Dual microphone array
-  - Built-in algorithms
-  - LED indicators
-- **Setup**:
+- **価格**: 約$15-20
+- **長所**: 
+  - デュアルマイクアレイ
+  - 内蔵アルゴリズム
+  - LEDインジケーター
+- **セットアップ**:
   ```bash
   git clone https://github.com/respeaker/seeed-voicecard
   cd seeed-voicecard
   sudo ./install.sh
   ```
 
-#### Adafruit I2S MEMS Microphone
-- **Price**: ~$10-15
-- **Pros**: Very compact, low power
-- **Cons**: Requires I2S configuration
+#### Adafruit I2S MEMSマイク
+- **価格**: 約$10-15
+- **長所**: 非常にコンパクト、低消費電力
+- **短所**: I2S設定が必要
 
-### Speakers
+### スピーカー
 
-#### USB Speakers
-- **Recommended**: Any USB 2.0 powered speakers
-- **Example**: Creative Pebble ($25-30)
-- **Setup**: Plug-and-play on both platforms
+#### USBスピーカー
+- **推奨**: 任意のUSB 2.0電源スピーカー
+- **例**: Creative Pebble（$25-30）
+- **セットアップ**: 両プラットフォームでプラグアンドプレイ
 
-#### 3.5mm Audio
-- **macOS**: Built-in or any 3.5mm speakers
-- **Raspberry Pi**: Requires good power supply
-- **Note**: Pi's 3.5mm output quality varies
+#### 3.5mmオーディオ
+- **macOS**: 内蔵または任意の3.5mmスピーカー
+- **Raspberry Pi**: 良好な電源が必要
+- **注意**: Piの3.5mm出力品質は変動する
 
-#### I2S Audio DACs
-- **Example**: HiFiBerry DAC+
-- **Pros**: High-quality audio output
-- **Setup**: Requires device tree overlay configuration
+#### I2SオーディオDAC
+- **例**: HiFiBerry DAC+
+- **長所**: 高品質オーディオ出力
+- **セットアップ**: デバイスツリーオーバーレイ設定が必要
 
-### Bluetooth Audio
-- **Pros**: Wireless, convenient
-- **Cons**: 
-  - Latency issues
-  - Connection stability
-  - Power consumption
-- **Recommendation**: Avoid for real-time voice interaction
+### Bluetoothオーディオ
+- **長所**: ワイヤレス、便利
+- **短所**: 
+  - レイテンシの問題
+  - 接続の安定性
+  - 消費電力
+- **推奨**: リアルタイム音声対話には避ける
 
-## Development Environment Setup
+## 開発環境のセットアップ
 
-### macOS Development Environment
+### macOS開発環境
 
-#### Prerequisites
+#### 前提条件
 ```bash
-# Install Homebrew
+# Homebrewのインストール
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Install Node.js and Python
+# Node.jsとPythonのインストール
 brew install node python@3.11
 
-# Install audio libraries
+# オーディオライブラリのインストール
 brew install portaudio
 
-# Install development tools
+# 開発ツールのインストール
 brew install git wget
 ```
 
-#### IDE Setup
+#### IDEセットアップ
 ```bash
-# VS Code with extensions
+# VS Codeと拡張機能
 brew install --cask visual-studio-code
 
-# Install extensions
+# 拡張機能のインストール
 code --install-extension dbaeumer.vscode-eslint
 code --install-extension esbenp.prettier-vscode
 code --install-extension ms-vscode.vscode-typescript-next
 ```
 
-### Raspberry Pi Development Environment
+### Raspberry Pi開発環境
 
-#### Option 1: Direct Development on Pi
+#### オプション1：Pi上での直接開発
 
 ```bash
-# Enable SSH
+# SSHの有効化
 sudo systemctl enable ssh
 sudo systemctl start ssh
 
-# Install development tools
+# 開発ツールのインストール
 sudo apt install -y git vim build-essential
 
-# Install Node.js (via NodeSource)
+# Node.jsのインストール（NodeSource経由）
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt install -y nodejs
 
-# Python and audio libraries
+# Pythonとオーディオライブラリ
 sudo apt install -y python3-pip python3-venv
 sudo apt install -y portaudio19-dev python3-pyaudio
 ```
 
-#### Option 2: Cross-Platform Development
+#### オプション2：クロスプラットフォーム開発
 
-##### Setup on macOS
+##### macOS上でのセットアップ
 ```bash
-# Install cross-compilation tools
+# クロスコンパイルツールのインストール
 brew install arm-linux-gnueabihf-binutils
 
-# Setup remote development
+# リモート開発のセットアップ
 npm install -g remote-sync
 ```
 
-##### VS Code Remote Development
-1. Install "Remote - SSH" extension
-2. Configure SSH connection to Pi
-3. Develop on macOS, run on Pi
+##### VS Codeリモート開発
+1. "Remote - SSH"拡張機能をインストール
+2. PiへのSSH接続を設定
+3. macOS上で開発、Pi上で実行
 
-#### Option 3: Docker Development
+#### オプション3：Docker開発
 
 ```bash
-# On macOS - build for ARM
+# macOS上 - ARM用ビルド
 docker buildx build --platform linux/arm/v7 -t voice-agent-pi .
 
-# Transfer to Pi
+# Piへ転送
 docker save voice-agent-pi | ssh pi@raspberrypi docker load
 ```
 
-### Testing Framework
+### テストフレームワーク
 
-#### Unit Tests
+#### ユニットテスト
 ```bash
-# Same on both platforms
+# 両プラットフォームで同じ
 npm test
 ```
 
-#### Integration Tests
+#### 統合テスト
 ```javascript
 // platform-test.js
 const platform = process.platform === 'darwin' ? 'macos' : 'linux';
 const audioTests = require(`./tests/${platform}/audio`);
 ```
 
-#### Hardware-in-Loop Testing
+#### ハードウェアインループテスト
 ```bash
-# Raspberry Pi specific
+# Raspberry Pi専用
 sudo npm run test:hardware
 ```
 
-### Debugging Tools
+### デバッグツール
 
 #### macOS
-- Chrome DevTools (for web interface)
-- Activity Monitor (resource usage)
-- Console.app (system logs)
+- Chrome DevTools（Webインターフェース用）
+- アクティビティモニタ（リソース使用状況）
+- Console.app（システムログ）
 
 #### Raspberry Pi
-- `htop` - Process monitoring
-- `vcgencmd` - Hardware monitoring
-- `journalctl` - System logs
-- `alsamixer` - Audio debugging
+- `htop` - プロセス監視
+- `vcgencmd` - ハードウェア監視
+- `journalctl` - システムログ
+- `alsamixer` - オーディオデバッグ
 
-### Performance Profiling
+### パフォーマンスプロファイリング
 
 #### macOS
 ```bash
-# CPU profiling
+# CPUプロファイリング
 npm run profile:cpu
 
-# Memory profiling
+# メモリプロファイリング
 npm run profile:memory
 ```
 
 #### Raspberry Pi
 ```bash
-# Monitor resources
+# リソース監視
 ./scripts/monitor-pi.sh
 
-# Check thermal throttling
+# 熱スロットリングのチェック
 vcgencmd measure_temp
 vcgencmd get_throttled
 ```
 
-## Conclusion
+## まとめ
 
-Successfully running the voice agent on both macOS and Raspberry Pi requires careful consideration of platform differences. Key strategies include:
+音声エージェントをmacOSとRaspberry Piの両方で正常に実行するには、プラットフォームの違いを慎重に検討する必要があります。主な戦略には以下が含まれます：
 
-1. **Abstract platform-specific code** early in development
-2. **Choose appropriate models** based on hardware capabilities
-3. **Optimize aggressively** for Raspberry Pi
-4. **Test thoroughly** on target hardware
-5. **Plan deployment** strategy based on use case
+1. **プラットフォーム固有のコードを早期に抽象化**する
+2. ハードウェア機能に基づいて**適切なモデルを選択**する
+3. Raspberry Pi向けに**積極的に最適化**する
+4. ターゲットハードウェアで**徹底的にテスト**する
+5. ユースケースに基づいて**デプロイ戦略を計画**する
 
-With proper abstraction and optimization, the same codebase can effectively serve both platforms while maintaining good performance and user experience.
+適切な抽象化と最適化により、同じコードベースで両プラットフォームを効果的にサポートし、良好なパフォーマンスとユーザーエクスペリエンスを維持できます。
