@@ -244,6 +244,45 @@ NEXT_IMPROVEMENTS.md
 
 常にファイルを整理し、ドキュメントを最新に保つことで、自分も他の人も理解しやすいプロジェクトを維持しましょう。
 
+## ユーザーへのコマンド提示方法
+
+### ワンライナー形式での提示
+
+ユーザーがコマンドを試す際は、**ワンライナー形式**で提示すること。これにより、コピー＆ペーストで即座に実行できる。
+
+### 良い例
+
+```bash
+# サブシェルを使用して、現在のディレクトリを変更せずに実行
+(cd .worktrees/feature-porcupine-custom/sandbox/porcupine && uv run python test_wake_word_now.py wake_words/オッケーセバス_ja_mac_v3_0_0.ppn "オッケーセバス" --sensitivity 0.7 --duration 30)
+```
+
+### 避けるべき例
+
+```bash
+# ユーザーが手動でディレクトリを移動する必要がある
+cd .worktrees/feature-porcupine-custom/
+cd sandbox/porcupine/
+uv run python test_wake_word_now.py wake_words/オッケーセバス_ja_mac_v3_0_0.ppn "オッケーセバス" --sensitivity 0.7 --duration 30
+```
+
+### 複数のコマンドが必要な場合
+
+```bash
+# セミコロンまたは && で連結
+(cd path/to/directory && command1 && command2)
+
+# 環境変数の設定が必要な場合
+(cd path/to/directory && export VAR=value && uv run python script.py)
+```
+
+### メリット
+
+1. **即実行可能** - コピー＆ペーストで動作
+2. **安全** - 現在のディレクトリを変更しない
+3. **明確** - 実行コンテキストが一目瞭然
+4. **エラー処理** - サブシェル内でエラーが発生しても影響が限定的
+
 ## 知見のプロジェクト全体へのフィードバック
 
 ### 重要な原則
