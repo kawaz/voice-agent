@@ -27,6 +27,7 @@
 
 ### 2025年6月
 
+- [2025-06-25T20:30 Git Worktreeでやらかした話](20250625T2030-git-worktree-yarakashi.md) - mainブランチで作業して事故った話 😅
 - [2025-06-25T12:30 コマンド提示方法の改善](20250625T1230-command-presentation-insight.md) - ワンライナー形式の重要性に気づいた話
 - [2025-06-23T02:45 CLAUDE.md更新作業](20250623T0245-claude-md-update.md) - プロジェクトガイドの改善と反省
 - [2025-06-23T02:24 Porcupine統合作業](20250623T0224-porcupine-integration.md) - ウェイクワード検出エンジンの検証と「おっけーはうす」
