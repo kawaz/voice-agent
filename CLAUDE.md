@@ -13,6 +13,7 @@
 
 ### 開発方針
 - **[開発ガイドライン](docs/development-guidelines.md)** - サンドボックスの活用方法、作業日誌の作成など
+- **[作業セッションガイド](docs/work-session-guide.md)** - 作業開始・完了時の標準手順 🆕
 - **[Git ワークフロー](docs/git-workflow.md)** - 複数エージェント協働時のGit操作方法
 - **[通知ガイド](docs/notification-guide.md)** - ユーザーへの通知実装ガイドライン
 - **[言語別ガイドライン](docs/language-specific-guidelines.md)** - 特にPythonでの`uv`使用方法
@@ -21,6 +22,7 @@
 - **[最終実装計画](docs/final-implementation-plan.md)** - 現在の技術スタックと実装計画
 - **[技術的意思決定](docs/technical-decisions.md)** - 技術選定の根拠と決定事項
 - **[MVP実装ステータス](docs/mvp-implementation-status.md)** - 現在の進捗状況
+- **[TTS実装ガイド](docs/tts-implementation-guide.md)** - 音声合成の実装詳細 🆕
 
 ## 🛠️ 開発環境
 
