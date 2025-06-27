@@ -16,6 +16,7 @@
 ### 🔧 技術仕様
 - [`technical-decisions.md`](technical-decisions.md) - 技術選定の決定事項 ⭐️
 - [`speech-recognition-engine-comparison.md`](speech-recognition-engine-comparison.md) - 音声認識エンジン比較 🎤
+- [`tts-implementation-guide.md`](tts-implementation-guide.md) - TTS（音声合成）実装ガイド 🔊 🆕
 - [`sandbox-findings.md`](sandbox-findings.md) - サンドボックス検証結果まとめ 🧪
 
 ### 🎙️ ウェイクワード関連
@@ -29,6 +30,7 @@
 
 ### 📚 開発ガイド
 - [`development-guidelines.md`](development-guidelines.md) - 開発ガイドライン（サンドボックス管理、作業日誌含む） 📝
+- [`work-session-guide.md`](work-session-guide.md) - 作業セッションガイド（開始・完了手順） 📋 🆕
 - [`git-workflow.md`](git-workflow.md) - Gitワークフロー（複数エージェント協働） 🆕
 - [`language-specific-guidelines.md`](language-specific-guidelines.md) - 言語別開発ガイドライン ⭐️
 - [`uv-migration-guide.md`](uv-migration-guide.md) - uv移行ガイド（pip→uv add） 🆕
@@ -69,3 +71,19 @@
 - 📝 ガイドライン・手順
 - 🆕 最近追加/更新
 - ⭐️ 重要度高
+- 🔊 音声合成（TTS）関連
+- 📋 手順書・チェックリスト
+
+## プロジェクト構造
+
+```
+voice-agent/
+├── docs/               # ドキュメント
+│   ├── archive/       # アーカイブされた古いドキュメント
+│   └── work-logs/     # AIエージェントの作業日誌
+├── sandbox/           # 実験・検証用サンドボックス
+│   ├── openwakeword/  # OpenWakeWord検証
+│   ├── porcupine/     # Porcupine検証
+│   └── tts-comparison/ # TTS（音声合成）比較検証
+└── scripts/           # ユーティリティスクリプト
+```
