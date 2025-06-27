@@ -110,8 +110,8 @@ ls -la
 
 ```bash
 # 作業日誌を作成
-# ファイル名: YYYYMMDD-brief-description.md
-vim docs/work-logs/20250627-tts-implementation.md
+# ファイル名: YYYYMMDDTHHMM-brief-description.md
+vim docs/work-logs/20250627T1445-tts-implementation.md
 
 # 技術ドキュメントの更新（必要に応じて）
 vim docs/technical-decisions.md

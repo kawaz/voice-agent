@@ -10,6 +10,9 @@
 
 ### 🏗️ アーキテクチャ
 - [`architecture.md`](architecture.md) - システムアーキテクチャ
+- [`architecture-analysis.md`](architecture-analysis.md) - アーキテクチャ分析
+- [`improved-architecture-design.md`](improved-architecture-design.md) - 改善されたアーキテクチャ設計
+- [`implementation-roadmap.md`](implementation-roadmap.md) - 実装ロードマップ
 - [`local-first-architecture.md`](local-first-architecture.md) - ローカルファーストアーキテクチャ
 - [`cross-platform-consideration.md`](cross-platform-consideration.md) - Cross-Platform Considerations (English)
 
