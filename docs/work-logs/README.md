@@ -27,6 +27,7 @@
 
 ### 2025年6月
 
+- [2025-06-27T10:15 wake-whisperプロトタイプ完成](20250627T1015-wake-whisper-prototype-kansei.md) - ウェイクワード→音声認識の統合成功！やったー！
 - [2025-06-25T12:30 コマンド提示方法の改善](20250625T1230-command-presentation-insight.md) - ワンライナー形式の重要性に気づいた話
 - [2025-06-23T02:45 CLAUDE.md更新作業](20250623T0245-claude-md-update.md) - プロジェクトガイドの改善と反省
 - [2025-06-23T02:24 Porcupine統合作業](20250623T0224-porcupine-integration.md) - ウェイクワード検出エンジンの検証と「おっけーはうす」
