@@ -21,6 +21,27 @@ def check_api_server():
 
 def start_api_server():
     """APIサーバーを自動起動"""
+    # まずVOICEVOXがインストールされているか確認
+    from pathlib import Path
+    if not Path("voicevox_engine").exists():
+        print("\nエラー: VOICEVOXがインストールされていません", file=sys.stderr)
+        # 標準入力が端末でない場合（パイプ等）は自動セットアップをスキップ
+        if not sys.stdin.isatty():
+            print("セットアップ: vsay engine setup", file=sys.stderr)
+            print("起動: vsay engine start", file=sys.stderr)
+            sys.exit(1)
+        
+        print("VOICEVOXをセットアップしますか？ (y/N)", file=sys.stderr)
+        response = input().strip().lower()
+        if response in ['y', 'yes']:
+            print("\nセットアップを実行します...", file=sys.stderr)
+            subprocess.run(['uv', 'run', 'python', 'voicevox_manager.py', 'setup'])
+            sys.exit(0)
+        else:
+            print("セットアップ: vsay engine setup", file=sys.stderr)
+            print("起動: vsay engine start", file=sys.stderr)
+            sys.exit(1)
+    
     print("APIサーバーを起動しています...", file=sys.stderr)
     subprocess.Popen(
         ['uv', 'run', 'python', 'tts_api_server.py'],
