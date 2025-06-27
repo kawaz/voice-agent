@@ -27,6 +27,8 @@
 
 ### 2025年6月
 
+- [2025-06-27T10:40 多言語ウェイクワード実装](20250627T1040-multilingual-wake-word.md) - 日本語と英語の同時検出成功！
+- [2025-06-27T10:15 wake-whisperプロトタイプ完成](20250627T1015-wake-whisper-prototype-kansei.md) - ウェイクワード→音声認識の統合成功！やったー！
 - [2025-06-25T20:30 Git Worktreeでやらかした話](20250625T2030-git-worktree-yarakashi.md) - mainブランチで作業して事故った話 😅
 - [2025-06-25T12:30 コマンド提示方法の改善](20250625T1230-command-presentation-insight.md) - ワンライナー形式の重要性に気づいた話
 - [2025-06-23T02:45 CLAUDE.md更新作業](20250623T0245-claude-md-update.md) - プロジェクトガイドの改善と反省
