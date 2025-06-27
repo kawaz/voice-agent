@@ -106,6 +106,100 @@ class VoiceVoxManager:
         time.sleep(1)
         return self.start()
     
+    def setup(self):
+        """VOICEVOXエンジンのセットアップ"""
+        print("=== VOICEVOX Engine セットアップ ===")
+        
+        # 既にインストール済みか確認
+        if self.is_installed():
+            print(f"✓ VOICEVOXは既にインストール済みです: {self.engine_path}")
+            print("\nエンジンを起動しています...")
+            return self.start()
+        
+        # アーキテクチャの確認
+        import platform
+        machine = platform.machine()
+        if machine == "arm64":
+            arch = "arm64"
+            print("✓ Apple Silicon Mac を検出しました")
+        else:
+            arch = "x64"
+            print("✓ Intel Mac を検出しました")
+        
+        version = "0.23.1"
+        filename = f"voicevox_engine-macos-{arch}-{version}.7z.001"
+        url = f"https://github.com/VOICEVOX/voicevox_engine/releases/download/{version}/{filename}"
+        
+        print(f"\nダウンロードするファイル: {filename}")
+        print(f"URL: {url}")
+        print()
+        
+        # p7zipの確認
+        try:
+            subprocess.run(["7z", "--help"], capture_output=True, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print("エラー: p7zipがインストールされていません")
+            print("インストール: brew install p7zip")
+            return False
+        
+        # ダウンロード
+        if not Path(filename).exists():
+            print("ダウンロード中... (約1.4GB)")
+            try:
+                subprocess.run(["curl", "-L", "-o", filename, url], check=True)
+                print("✓ ダウンロード完了")
+            except subprocess.CalledProcessError:
+                print("エラー: ダウンロードに失敗しました")
+                return False
+        else:
+            print(f"✓ ファイルは既に存在します: {filename}")
+        
+        # 解凍
+        extract_dir = f"voicevox_engine-macos-{arch}-{version}"
+        temp_extract_dir = f"macos-{arch}"  # 7zはこの名前で解凍する
+        
+        if not Path(extract_dir).exists():
+            # 一時ディレクトリが存在する場合は削除
+            if Path(temp_extract_dir).exists():
+                import shutil
+                shutil.rmtree(temp_extract_dir)
+            
+            print("解凍中...")
+            try:
+                subprocess.run(["7z", "x", "-y", filename], check=True)
+                # 解凍されたディレクトリをリネーム
+                if Path(temp_extract_dir).exists():
+                    Path(temp_extract_dir).rename(extract_dir)
+                print("✓ 解凍完了")
+            except subprocess.CalledProcessError:
+                print("エラー: 解凍に失敗しました")
+                return False
+        else:
+            print(f"✓ 既に解凍されています: {extract_dir}")
+        
+        # 実行権限の付与
+        run_path = Path(extract_dir) / "run"
+        if run_path.exists():
+            run_path.chmod(0o755)
+            print("✓ 実行権限を付与しました")
+        else:
+            print(f"エラー: runファイルが見つかりません: {run_path}")
+            return False
+        
+        # シンボリックリンクの作成
+        if not Path("voicevox_engine").exists():
+            Path("voicevox_engine").symlink_to(extract_dir)
+            print("✓ シンボリックリンクを作成しました: voicevox_engine")
+        else:
+            print("✓ シンボリックリンクは既に存在します: voicevox_engine")
+        
+        print("\n=== セットアップ完了！ ===")
+        print("\nVOICEVOXエンジンを起動しています...")
+        
+        # エンジンパスを更新して起動
+        self.engine_path = Path("voicevox_engine")
+        return self.start()
+    
     def _signal_handler(self, signum, frame):
         """シグナルハンドラー"""
         print("\n終了シグナルを受信しました")
@@ -218,7 +312,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='VOICEVOX マネージャー')
     parser.add_argument('command', nargs='?', default='help',
-                       choices=['start', 'stop', 'restart', 'status', 'test', 'interactive', 'help'],
+                       choices=['start', 'stop', 'restart', 'status', 'test', 'interactive', 'setup', 'help'],
                        help='実行するコマンド')
     parser.add_argument('--port', type=int, default=50021,
                        help='使用するポート (デフォルト: 50021)')
@@ -263,6 +357,9 @@ def main():
     elif args.command == 'interactive':
         manager.interactive_mode()
     
+    elif args.command == 'setup':
+        manager.setup()
+    
     else:  # help
         print("使用方法: python voicevox_manager.py [コマンド]")
         print()
@@ -273,6 +370,7 @@ def main():
         print("  status      - 状態を確認")
         print("  test        - 音声合成のテスト")
         print("  interactive - 対話モード")
+        print("  setup       - VOICEVOXエンジンをセットアップ")
         print("  help        - このヘルプを表示")
         print()
         print("オプション:")
